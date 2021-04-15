@@ -22,50 +22,58 @@ public class Main {
 	  }
 	  
 	  /* Below calculates Tax Payable of an individual/ married couple
-	   * according to their Income or Net Chargeable Income */
+	   * according to different Tax Rates */
 	  
-	  static int calculateTax(int net, int tax, boolean standard) {
+	  public int calculateTax(int net, int tax, boolean joint) {
 
 		  double first = 50000 * 0.02;		//On the 1st 50,000 at 2%
 		  double second = 50000 * 0.06;		//On the 2nd 50,000 at 6%
 		  double third = 50000 * 0.1;		//On the 3rd 50,000 at 10%
 		  double forth = 50000 * 0.14;		//On the 4th 50,000 at 14%
+		  int standard = 0, progressive = 0;
 		  
-		  /* If the calculation applied Standard Tax Rate, the whole Income will be multiplied by 15%
-		   * Otherwise, it will follow the basic tax calculation */
+		  /* Below calculates the Tax Payable while using Standard Tax Rate */
 		  
-		  if (standard == true ){
-			  int total = (int) ((net)*0.15);
-			  tax = total;				  
-		  }else {
-			  if (net < 50) {
-				  tax = 0;
-			  } else if (net <= 50000){
-				  int total = (int) (net * 0.02);
-				  tax = total;
-			  } else if ((net>50000) && (net<=100000)){
-				  int total = (int) (first + (net-50000)*0.06);
-				  tax = total;
-			  } else if ((net>100000) && (net<=150000)) {
-				  int total = (int) (first + second + (net-50000*2)*0.1);
-				  tax = total;
-			  } else if ((net>150000) && (net<=200000)) {
-				  int total = (int) (first + second + third + (net-50000*3)*0.14);
-				  tax = total;
-			  } else if (net>200000) {
-				  
-				  /* If Net Chargeable Income is over 200,000, the remainder will be multiplied by 17% */
-				  
-				  int total = (int) (first + second + third + forth + (net-50000*4)*0.17);
-				  tax = total;		  
-			  }
+		  if (joint == true) {
+			   standard = (int) ((net+132000*2)*0.15);
+		  } else {
+			  standard = (int) ((net+132000)*0.15);
 		  }
+		  
+		  /* Below calculates the Tax Payable while using Progressive Tax Rate */
+		  
+		  if (net < 50) {
+			  progressive = 0;
+		  } else if (net <= 50000){
+			  progressive = (int) (net * 0.02);
+		  } else if ((net>50000) && (net<=100000)){
+			  progressive = (int) (first + (net-50000)*0.06);
+		  } else if ((net>100000) && (net<=150000)) {
+			  progressive = (int) (first + second + (net-50000*2)*0.1);
+		  } else if ((net>150000) && (net<=200000)) {
+			  progressive = (int) (first + second + third + (net-50000*3)*0.14);
+		  } else if (net>200000) {
+				  
+			  /* If Net Chargeable Income is over 200,000, the remainder will be multiplied by 17% */
+				  
+			  progressive = (int) (first + second + third + forth + (net-50000*4)*0.17);
+		  }
+		  
+		  /* Below compares if Tax Payable under Standard Tax Rate or Progressive Tax rate is lower,
+		   * then choose the better option*/
+		  
+		  if (standard<progressive) {
+			  tax = standard;
+		  } else {
+			  tax = progressive;
+		  }
+	   	
 		  return tax;
 		   
 	  }
 	  
 	  /* Below compares if Tax Payable under Separate Taxation or Joint Assessment is lower,
-	   * then recommend the better choice for the user */
+	   * then recommends the better choice for the user */
 	  
 	  static int Choice(int separate, int joint) {
 		  	int pay = 0;
@@ -86,7 +94,7 @@ public class Main {
 	  /* Main Program */
 	  public int main(int self, int spouse) {
 		  int SelfMPF, SpouseMPF, allowance, SelfNet, SpouseNet, SelfTax, SpouseTax, TotalNet, SeparateTaxation, JointAssessment, TaxPayable;
-		  boolean isStandard = false;
+		  boolean joint = false;
 		  SelfMPF = 0;
 		  SpouseMPF = 0;
 		  allowance = 132000;	//Allowance is set to 132,000
@@ -107,27 +115,9 @@ public class Main {
 
 		  SelfNet = calculateNet(self, SelfMPF, allowance, SelfNet);		//Calculates the user's Net Chargeable Income
 		  SpouseNet = calculateNet(spouse, SpouseMPF, allowance, SpouseNet);		//Calculates their spouse's Net Chargeable Income
-		  
-		  /* If an individual's income is 2,040,030 or above, he/ she applies Standard Tax Rate */
-		  if (self>=2040030) {
-			  SelfNet = SelfNet + 132000;
-			  isStandard = true;
-		  }
-		  SelfTax = calculateTax(SelfNet, SelfTax, isStandard);		//Calculates the user's Tax Payable
-		  if (self>=2040030) {
-			  SelfNet = SelfNet - 132000;
-			  isStandard = false;
-		  }
-		  
-		  if (spouse>=2040030) {
-			  SpouseNet = SpouseNet + 132000;
-			  isStandard = true;
-		  }
-		  SpouseTax = calculateTax(SpouseNet, SpouseTax, isStandard);		//Calculates their spouse's Tax Payable
-		  if (spouse>=2040030) {
-			  SpouseNet = SpouseNet - 132000;
-			  isStandard = false;
-		  }
+		 
+		  SelfTax = calculateTax(SelfNet, SelfTax, joint);		//Calculates the user's Tax Payable
+		  SpouseTax = calculateTax(SpouseNet, SpouseTax, joint);		//Calculates their spouse's Tax Payable
 		  
 		  System.out.println();
 		  System.out.println("Your Total Tax Payable: HK$ " + SelfTax);		//Displays the user's Tax Payable
@@ -135,16 +125,10 @@ public class Main {
 		  SeparateTaxation = SelfTax + SpouseTax;		//Calculate Total Tax Payable under Separate Taxation
 		  TotalNet = SelfNet + SpouseNet;		//Calculate Total Net Chargeable Income
 		  
-		  /* If a pair of married couple's income is 3,180,024 or above, they applies Standard Tax Rate */
-		  if ((self+spouse)>=3180024) {  
-			  TotalNet = TotalNet+132000*2;
-			  isStandard = true;
-		  }
-		  JointAssessment = calculateTax(TotalNet, JointAssessment, isStandard);	//Calculates Total Tax Payable
-		  if ((self+spouse)>=3180024) {
-			  TotalNet = TotalNet-132000*2;
-			  isStandard = false;
-		  }
+		  /* Assign the boolean joint to true if the Tax calculation is under Joint Assessment */
+		  joint = true;
+		  JointAssessment = calculateTax(TotalNet, JointAssessment, joint);	//Calculate Total Tax Payable under Joint Assessment
+		  joint = false;
 		  
 		  /* Display Total Tax Payable under two systems */
 		  System.out.println("So, Total Tax Payable by You and Your Spouse under Separate Taxation: HK$ " + SeparateTaxation);

@@ -16,7 +16,32 @@ public class maintestTest {
 		
 		 maintestTest = new Main(); //create a new object referencing to Main.java
 	}
+	
+	@Test
+	@DisplayName("Case 00 - Tax Calculation") //Test if Method calculateTax() can calculate and choose the right taxation option
+	public void testTaxCalculation()throws Exception {
 		
+		System.out.println("STARTING TEST: " + new Object(){}.getClass().getEnclosingMethod().getName());
+		System.out.println();
+			
+		assertEquals("The result should be ..", 775800, maintestTest.calculateTax(4908000, 0, true ));
+		System.out.println("------------------------------------------------------------------------");
+		
+		assertEquals("The result should be ..", 271000, maintestTest.calculateTax(1700000, 0, true));
+		System.out.println("------------------------------------------------------------------------");
+
+		assertEquals("The result should be ..", 126500, maintestTest.calculateTax(850000, 0, false));
+		System.out.println("------------------------------------------------------------------------");
+
+		assertEquals("The result should be ..", 41500, maintestTest.calculateTax(350000, 0, false));
+		System.out.println("------------------------------------------------------------------------");
+		
+		System.out.println();
+		System.out.println("ENDING TEST: " + new Object(){}.getClass().getEnclosingMethod().getName());
+		System.out.println("==============================********==================================");
+				
+	}
+	
 	@Test
 	@DisplayName("Case 0 - Normal Income - Separate Preferred") //Test if outcome is Separate Taxation
 	public void testmain()throws Exception {
